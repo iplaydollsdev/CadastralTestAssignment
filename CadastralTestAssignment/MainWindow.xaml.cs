@@ -17,6 +17,8 @@ using System.Windows.Shapes;
 using System.IO;
 using System.Xml;
 using System.ComponentModel;
+using WinRT;
+using System.Reflection;
 
 namespace CadastralTestAssignment
 {
@@ -72,7 +74,7 @@ namespace CadastralTestAssignment
             {
                 if (property.PropertyType == typeof(string))
                 {
-                    if (property.Name == "CadastralNumber")
+                    if (property.Name == "Indexer")
                         continue;
 
                     var value = property.GetValue(_viewModel.SelectedItem) as string;
@@ -95,21 +97,53 @@ namespace CadastralTestAssignment
                         PropertiesStackPanel.Children.Add(textBlock);
                     }
                 }
-                if (property.PropertyType == typeof(List<string>))
+                if (property.PropertyType == typeof(List<SpatialElementModel>))
                 {
                     var label = new Label
                     {
-                        Content = "Ordinates",
+                        Content = "SpatialElements",
                         HorizontalAlignment = HorizontalAlignment.Center
                     };
-                    var ordinates = new ListBox()
+
+                    var spatialElements = property.GetValue(_viewModel.SelectedItem) as List<SpatialElementModel>;
+
+                    var spatialElementsListBox = new ListBox
                     {
-                        ItemsSource = property.GetValue(_viewModel.SelectedItem) as List<string>,
-                        IsEnabled = false,
+                        IsEnabled = false
                     };
 
+                    foreach (var spatialElement in spatialElements!)
+                    {
+                        var spatialElementLabel = new Label
+                        {
+                            Content = "Spatial Element",
+                            HorizontalAlignment = HorizontalAlignment.Center
+                        };
+
+                        var ordinatesListBox = new ListBox
+                        {
+                            IsEnabled = false
+                        };
+
+                        foreach (var ordinate in spatialElement.Ordinates)
+                        {
+                            var ordinateLabel = new Label
+                            {
+                                Content = ordinate.StringView,
+                            };
+
+                            ordinatesListBox.Items.Add(ordinateLabel);
+                        }
+
+                        var spatialElementStackPanel = new StackPanel();
+                        spatialElementStackPanel.Children.Add(spatialElementLabel);
+                        spatialElementStackPanel.Children.Add(ordinatesListBox);
+
+                        spatialElementsListBox.Items.Add(spatialElementStackPanel);
+                    }
+
                     PropertiesStackPanel.Children.Add(label);
-                    PropertiesStackPanel.Children.Add(ordinates);
+                    PropertiesStackPanel.Children.Add(spatialElementsListBox);
                 }
             }
         }

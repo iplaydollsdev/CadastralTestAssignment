@@ -84,6 +84,19 @@ namespace CadastralTestAssignment.Core
                 }
             }
 
+            XElement? zoneRecords = xdoc?.Element("extract_cadastral_plan_territory")?
+                 .Element("cadastral_blocks")?
+                 .Element("cadastral_block")?
+                 .Element("zones_and_territories_boundaries");
+            if (zoneRecords is not null)
+            {
+                foreach (XElement zoneRecord in zoneRecords.Elements("zones_and_territories_record"))
+                {
+                    Models.Add(new ZoneModel(zoneRecord));
+                }
+            }
+
+
         }
     }
 }

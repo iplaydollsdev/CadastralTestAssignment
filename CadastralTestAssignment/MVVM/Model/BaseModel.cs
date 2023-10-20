@@ -9,16 +9,16 @@ namespace CadastralTestAssignment.MVVM.Model
 {
     public abstract class BaseModel
     {
-        public string? CadastralNumber { get; set; }
+        public string? Indexer { get; set; }
 
         protected abstract void Deserialize(XElement xElement);
 
         public abstract void SoloSerialize();
         public abstract XElement Serialize();
-        protected void SetRandomCadastralNumber()
+        protected void SetRandomIndexInsteadOfCadastralNumber()
         {
             Random random = new Random();
-            CadastralNumber = $"{random.Next(0, 99)}:{random.Next(0, 999)}:{random.Next(0, 99999)}:{random.Next(0, 99)}";
+            Indexer = $"Indexer: {random.Next(0, 1000)}";
         }
     }
 }

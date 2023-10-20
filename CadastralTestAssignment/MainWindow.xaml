@@ -40,7 +40,7 @@
             CanUserDeleteRows="False"
             AutoGenerateColumns="False" SelectionMode="Single" CanUserResizeColumns="False" CanUserReorderColumns="False">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Cadastal Number" Binding="{Binding CadastralNumber}" Width="7*"/>
+                <DataGridTextColumn Header="Cadastal Number" Binding="{Binding Indexer}" Width="7*"/>
                 <DataGridCheckBoxColumn Header="Download" Width="2*"/>
             </DataGrid.Columns>
         </DataGrid>

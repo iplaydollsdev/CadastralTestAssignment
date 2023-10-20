@@ -1,29 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Xml.Linq;
 using Windows.Perception.Spatial;
 
 namespace CadastralTestAssignment.MVVM.Model
 {
-    public struct BoundaryOrdinate
-    {
-        public int OrdNum { get; set; }
-        public double X { get; set; }
-        public double Y { get; set; }
-    }
-
     public class BoundaryModel : BaseModel
     {
         public string? RegistrationDate { get; set; }
         public string? TypeBoundaryCode { get; set; }
         public string? TypeBoundaryValue { get; set; }
         public string? SkId { get; set; }
-        public List<BoundaryOrdinate> Ordinates { get; set; } = new List<BoundaryOrdinate>(3010);
-        public List<string> StringOrdinates { get; set; } = new List<string>(3010);
+        public List<SpatialElementModel> SpatialElements { get; set; } = new();
 
         public BoundaryModel(XElement boundary)
         {
@@ -31,12 +25,63 @@ namespace CadastralTestAssignment.MVVM.Model
         }
         public override XElement Serialize()
         {
-            throw new NotImplementedException();
+            DateTime dateTime = DateTime.Now;
+
+            var boundaryData = new XElement("BoundaryData",
+                                        new XAttribute("CadastralNumber", Indexer ?? string.Empty),
+                                        new XAttribute("DateCreated", dateTime.ToString("yyyy'-'MM'-'dd")));
+
+            XElement recordInfo = new XElement("record_info",
+                                      new XElement("registration_date", RegistrationDate));
+
+            XElement bObjectMunicipal = new XElement("b_object_municipal_boundary",
+                                            new XElement("b_object",
+                                                new XElement("reg_numb_border", Indexer),
+                                                new XElement("type_boundary",
+                                                    new XElement("code", TypeBoundaryCode),
+                                                    new XElement("value", TypeBoundaryValue))));
+
+            XElement bContoursLocation = new XElement("b_contours_location");
+            XElement contours = new XElement("contours");
+            XElement contour = new XElement("contour");
+            XElement entitySpatial = new XElement("entity_spatial");
+
+            XElement skId = new XElement("sk_id", SkId);
+            XElement spatialsElements = new XElement("spatials_elements");
+
+            foreach (var spatial in SpatialElements)
+            {
+                var spatialElement = spatial.Serialize();
+                spatialsElements!.Add(spatialElement);
+            }
+
+            entitySpatial.Add(skId);
+            entitySpatial.Add(spatialsElements);
+            contour.Add(entitySpatial);
+            contours.Add(contour);
+            bContoursLocation.Add(contours);
+
+            boundaryData.Add(recordInfo);
+            boundaryData.Add(bObjectMunicipal);
+            boundaryData.Add(bContoursLocation);
+
+            return boundaryData;
         }
 
         public override void SoloSerialize()
         {
-            throw new NotImplementedException();
+            DateTime dateTime = DateTime.Now;
+
+            XDocument xDoc = new XDocument();
+
+            XElement boundaryData = Serialize();
+
+            xDoc.Add(boundaryData);
+
+            string savePath = Path.Combine("D:", $"BoundaryData_{dateTime.ToString("yy'-'MM'-'dd'_'HH'-'mm")}.xml");
+            xDoc.Save(savePath);
+            MessageBox.Show($"File saved at: {savePath}");
+
         }
 
         protected override void Deserialize(XElement boundary)
@@ -46,7 +91,7 @@ namespace CadastralTestAssignment.MVVM.Model
 
             XElement? bObjectMunicipalBoundary = boundary.Element("b_object_municipal_boundary");
             XElement? bObject = bObjectMunicipalBoundary?.Element("b_object");
-            CadastralNumber = bObject?.Element("reg_numb_border")?.Value ?? string.Empty;
+            Indexer = bObject?.Element("reg_numb_border")?.Value ?? string.Empty;
 
             XElement? typeBoundary = bObject?.Element("type_boundary");
             TypeBoundaryCode = typeBoundary?.Element("code")?.Value ?? string.Empty;
@@ -55,33 +100,18 @@ namespace CadastralTestAssignment.MVVM.Model
             XElement? entitySpatial = boundary.Element("b_contours_location")?.Element("contours")?.Element("contour")?.Element("entity_spatial");
             SkId = entitySpatial?.Element("sk_id")?.Value ?? string.Empty;
 
-            XElement? orinates = entitySpatial?.Element("spatials_elements")?.Element("spatial_element")?.Element("ordinates");
-            if (orinates is not null)
+            XElement? spatialElements = entitySpatial?.Element("spatials_elements");
+            if (spatialElements is not null)
             {
-                foreach (var ordinate in orinates.Elements("ordinate"))
+                foreach (var spatial in spatialElements.Elements("spatial_element"))
                 {
-                    Int32.TryParse(ordinate?.Element("ord_nmb")?.Value, out int i);
-                    Double.TryParse((ordinate?.Element("x")?.Value), CultureInfo.InvariantCulture, out double _x);
-                    Double.TryParse((ordinate?.Element("y")?.Value), CultureInfo.InvariantCulture, out double _y);
-                    var ordinateValue = new BoundaryOrdinate
-                    {
-                        X = _x,
-                        Y = _y,
-                        OrdNum = i
-                    };
-                    Ordinates.Add(ordinateValue);
-                    StringOrdinates.Add(GetOrdinate(ordinateValue));
+                    var spatialInstance = new SpatialElementModel(spatial);
+                    SpatialElements.Add(spatialInstance);
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(CadastralNumber))
-                SetRandomCadastralNumber();
+            if (string.IsNullOrWhiteSpace(Indexer))
+                SetRandomIndexInsteadOfCadastralNumber();
         }
-
-        public string GetOrdinate(BoundaryOrdinate ordinate)
-        {
-            return $"{ordinate.OrdNum}. X: {ordinate.X}, Y: {ordinate.Y}";
-        }
-
     }
 }

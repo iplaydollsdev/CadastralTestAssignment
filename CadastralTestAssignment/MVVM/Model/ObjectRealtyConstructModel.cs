@@ -33,7 +33,7 @@ namespace CadastralTestAssignment.MVVM.Model
             DateTime dateTime = DateTime.Now;
 
             var objectRealyConstruct = new XElement("ObjectRealtyConstruction",
-                    new XAttribute("CadastralNumber", CadastralNumber ?? "01:01:0000001:1"),
+                    new XAttribute("CadastralNumber", Indexer ?? string.Empty),
                     new XAttribute("State", TypeCode ?? string.Empty),
                     new XAttribute("DateCreated", dateTime.ToString("yyyy'-'MM'-'dd")),
                     new XElement("object",
@@ -42,7 +42,7 @@ namespace CadastralTestAssignment.MVVM.Model
                                 new XElement("code", TypeCode),
                                 new XElement("value", TypeValue)
                             ),
-                            new XElement("cad_number", CadastralNumber)
+                            new XElement("cad_number", Indexer)
                     ),
                     new XElement("params",
                         new XElement("purpose", PurposeValue)
@@ -76,7 +76,7 @@ namespace CadastralTestAssignment.MVVM.Model
 
             XDocument xDoc = new XDocument(
             new XElement("ObjectRealtyConstruction",
-                    new XAttribute("CadastralNumber", CadastralNumber ?? "01:01:0000001:1"),
+                    new XAttribute("CadastralNumber", Indexer ?? string.Empty),
                     new XAttribute("State", TypeCode ?? string.Empty),
                     new XAttribute("DateCreated", dateTime.ToString("yyyy'-'MM'-'dd")),
                     new XElement("object",
@@ -85,7 +85,7 @@ namespace CadastralTestAssignment.MVVM.Model
                                 new XElement("code", TypeCode),
                                 new XElement("value", TypeValue)
                             ),
-                            new XElement("cad_number", CadastralNumber)
+                            new XElement("cad_number", Indexer)
                     ),
                     new XElement("params",
                         new XElement("purpose", PurposeValue)
@@ -123,7 +123,7 @@ namespace CadastralTestAssignment.MVVM.Model
             XElement? type = commonData?.Element("type");
             TypeCode = type?.Element("code")?.Value ?? string.Empty;
             TypeValue = type?.Element("value")?.Value ?? string.Empty;
-            CadastralNumber = commonData?.Element("cad_number")?.Value ?? string.Empty;
+            Indexer = commonData?.Element("cad_number")?.Value ?? string.Empty;
 
             XElement? paramsElement = xElement.Element("params");
             XElement? purpose = paramsElement?.Element("purpose");
@@ -152,8 +152,8 @@ namespace CadastralTestAssignment.MVVM.Model
 
             ReadableAddress = address?.Element("readable_address")?.Value ?? string.Empty;
 
-            if (string.IsNullOrWhiteSpace(CadastralNumber))
-                SetRandomCadastralNumber();
+            if (string.IsNullOrWhiteSpace(Indexer))
+                SetRandomIndexInsteadOfCadastralNumber();
         }
     }
 }

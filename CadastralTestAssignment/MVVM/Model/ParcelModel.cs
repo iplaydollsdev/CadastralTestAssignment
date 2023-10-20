@@ -49,7 +49,7 @@ namespace CadastralTestAssignment.MVVM.Model
             XElement? type = commonData?.Element("type");
             TypeCode = type?.Element("code")?.Value ?? string.Empty;
             TypeValue = type?.Element("value")?.Value ?? string.Empty;
-            CadastralNumber = commonData?.Element("cad_number")?.Value ?? string.Empty;
+            Indexer = commonData?.Element("cad_number")?.Value ?? string.Empty;
 
             XElement? subtype = objectElement?.Element("subtype");
             SubtypeCode = subtype?.Element("code")?.Value ?? string.Empty;
@@ -101,15 +101,15 @@ namespace CadastralTestAssignment.MVVM.Model
             InBoundariesMark = relPosition?.Element("in_boundaries_mark")?.Value ?? string.Empty;
 
             Cost = parcel.Element("cost")?.Element("value")?.Value ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(CadastralNumber))
-                SetRandomCadastralNumber();
+            if (string.IsNullOrWhiteSpace(Indexer))
+                SetRandomIndexInsteadOfCadastralNumber();
         }
         public override XElement Serialize()
         {
             DateTime dateTime = DateTime.Now;
 
             var parsel = new XElement("Parcel",
-                    new XAttribute("CadastralNumber", CadastralNumber ?? "01:01:0000001:1"),
+                    new XAttribute("CadastralNumber", Indexer ?? string.Empty),
                     new XAttribute("State", TypeCode ?? string.Empty),
                     new XAttribute("DateCreated", dateTime.ToString("yyyy'-'MM'-'dd")),
                     new XElement("object",
@@ -118,7 +118,7 @@ namespace CadastralTestAssignment.MVVM.Model
                                 new XElement("code", TypeCode),
                                 new XElement("value", TypeValue)
                             ),
-                            new XElement("cad_number", CadastralNumber)
+                            new XElement("cad_number", Indexer)
                         ),
                         new XElement("subtype",
                             new XElement("code", SubtypeCode),
@@ -192,7 +192,7 @@ namespace CadastralTestAssignment.MVVM.Model
 
             XDocument xDoc = new XDocument(
                 new XElement("Parcel",
-                    new XAttribute("CadastralNumber", CadastralNumber ?? "01:01:0000001:1"),
+                    new XAttribute("CadastralNumber", Indexer ?? string.Empty),
                     new XAttribute("State", TypeCode ?? string.Empty),
                     new XAttribute("DateCreated", dateTime.ToString("yyyy'-'MM'-'dd")),
                     new XElement("object",
@@ -201,7 +201,7 @@ namespace CadastralTestAssignment.MVVM.Model
                                 new XElement("code", TypeCode),
                                 new XElement("value", TypeValue)
                             ),
-                            new XElement("cad_number", CadastralNumber)
+                            new XElement("cad_number", Indexer)
                         ),
                         new XElement("subtype",
                             new XElement("code", SubtypeCode),
