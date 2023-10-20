@@ -71,6 +71,19 @@ namespace CadastralTestAssignment.Core
                     Models.Add(new SpatialDataModel(spatialRecord));
                 }
             }
+
+            XElement? boundaryRecords = xdoc?.Element("extract_cadastral_plan_territory")?
+                 .Element("cadastral_blocks")?
+                 .Element("cadastral_block")?
+                 .Element("municipal_boundaries");
+            if (boundaryRecords is not null)
+            {
+                foreach (XElement boudaryRecord in boundaryRecords.Elements("municipal_boundary_record"))
+                {
+                    Models.Add(new BoundaryModel(boudaryRecord));
+                }
+            }
+
         }
     }
 }

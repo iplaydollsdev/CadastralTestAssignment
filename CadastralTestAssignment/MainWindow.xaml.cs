@@ -105,7 +105,7 @@ namespace CadastralTestAssignment
                     var ordinates = new ListBox()
                     {
                         ItemsSource = property.GetValue(_viewModel.SelectedItem) as List<string>,
-                        IsEnabled = false
+                        IsEnabled = false,
                     };
 
                     PropertiesStackPanel.Children.Add(label);

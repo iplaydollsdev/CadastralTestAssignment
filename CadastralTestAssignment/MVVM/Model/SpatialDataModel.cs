@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Xml.Linq;
+using Windows.Perception.Spatial;
 
 namespace CadastralTestAssignment.MVVM.Model
 {
@@ -32,7 +35,47 @@ namespace CadastralTestAssignment.MVVM.Model
 
         public override void SoloSerialize()
         {
-            throw new NotImplementedException();
+            DateTime dateTime = DateTime.Now;
+
+            XDocument xDoc = new XDocument();
+
+            XElement spatialData = new XElement("SpatialData");
+            XAttribute cadastralNumber = new XAttribute("CadastralNumber", CadastralNumber ?? "01:01:0000001:1");
+            XAttribute dataCreated = new XAttribute("DateCreated", dateTime.ToString("yyyy'-'MM'-'dd"));
+
+
+
+            XElement skId = new XElement("sk_id", SkId);
+            XElement spatialsElements = new XElement("spatials_elements");
+
+
+
+            XElement spatialElement = new XElement("spatial_element");
+            XElement ordinates = new XElement("ordinates");
+
+            foreach (var o in Ordinates)
+            {
+                var ordinate = new XElement("ordinate",
+                                    new XElement("x", o.X),
+                                    new XElement("y", o.Y));
+                ordinates!.Add(ordinate);
+            }
+
+            spatialElement.Add(ordinates);
+            spatialsElements.Add(spatialElement);
+
+            spatialData.Add(skId);
+            spatialData.Add(spatialsElements);
+
+            spatialData.Add(cadastralNumber);
+            spatialData.Add(dataCreated);
+
+            xDoc.Add(spatialData);
+
+            string savePath = Path.Combine("D:", $"SpatialData_{dateTime.ToString("yy'-'MM'-'dd'_'HH'-'mm")}.xml");
+            xDoc.Save(savePath);
+            MessageBox.Show($"File saved at: {savePath}");
+
         }
 
         protected override void Deserialize(XElement spatialEntity)
