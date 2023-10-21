@@ -10,10 +10,12 @@ namespace CadastralTestAssignment.MVVM.Model
     public abstract class BaseModel
     {
         public string? Indexer { get; set; }
+        public string? Name { get; set; }
+        public bool IsSelected { get; set; } = false;
 
         protected abstract void Deserialize(XElement xElement);
 
-        public abstract void SoloSerialize();
+        public abstract void SoloSerialize(string path);
         public abstract XElement Serialize();
         protected void SetRandomIndexInsteadOfCadastralNumber()
         {

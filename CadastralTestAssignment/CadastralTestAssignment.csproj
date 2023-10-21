@@ -16,6 +16,9 @@
     <None Update="Files\24_21_1003001_2017-05-29_kpt11.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Files\extract_cadastral_plan_territory_23-10-21_14-21.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

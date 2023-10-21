@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,23 +12,23 @@ namespace CadastralTestAssignment.MVVM.Model
 {
     public class ZoneModel : BaseModel
     {
-        public string? RegistrationDate { get; set; }
-        public string? TypeZoneCode { get; set; }
-        public string? TypeZoneValue { get; set; }
-        public string? SkId { get; set; }
-        public List<SpatialElementModel> SpatialElements { get; set; } = new();
+        public string? RegistrationDate { get; private set; }
+        public string? TypeBoundaryCode { get; private set; }
+        public string? TypeBoundaryValue { get; private set; }
+        public string? TypeZoneCode { get; private set; }
+        public string? TypeZoneValue { get; private set; }
+        public string? SkId { get; private set; }
+        public List<SpatialElementModel> SpatialElements { get; private set; } = new();
 
         public ZoneModel(XElement boundary)
         {
+            Name = "Zone";
             Deserialize(boundary);
         }
         public override XElement Serialize()
         {
-            DateTime dateTime = DateTime.Now;
 
-            var boundaryData = new XElement("zones_and_territories_record",
-                                        new XAttribute("CadastralNumber", Indexer ?? string.Empty),
-                                        new XAttribute("DateCreated", dateTime.ToString("yyyy'-'MM'-'dd")));
+            var boundaryData = new XElement("zones_and_territories_record");
 
             XElement recordInfo = new XElement("record_info",
                                       new XElement("registration_date", RegistrationDate));
@@ -36,8 +37,11 @@ namespace CadastralTestAssignment.MVVM.Model
                                             new XElement("b_object",
                                                 new XElement("reg_numb_border", Indexer),
                                                 new XElement("type_boundary",
-                                                    new XElement("code", TypeZoneCode),
-                                                    new XElement("value", TypeZoneValue))));
+                                                    new XElement("code", TypeBoundaryCode),
+                                                    new XElement("value", TypeBoundaryValue))),
+                                            new XElement("type_zone",
+                                                new XElement("code", TypeZoneCode),
+                                                new XElement("value", TypeZoneValue)));
 
             XElement bContoursLocation = new XElement("b_contours_location");
             XElement contours = new XElement("contours");
@@ -66,7 +70,7 @@ namespace CadastralTestAssignment.MVVM.Model
             return boundaryData;
         }
 
-        public override void SoloSerialize()
+        public override void SoloSerialize(string path)
         {
             DateTime dateTime = DateTime.Now;
 
@@ -76,7 +80,7 @@ namespace CadastralTestAssignment.MVVM.Model
 
             xDoc.Add(zoneData);
 
-            string savePath = Path.Combine("D:", $"ZoneData_{dateTime.ToString("yy'-'MM'-'dd'_'HH'-'mm")}.xml");
+            string savePath = Path.Combine(path);
             xDoc.Save(savePath);
             MessageBox.Show($"File saved at: {savePath}");
 
@@ -87,13 +91,17 @@ namespace CadastralTestAssignment.MVVM.Model
             XElement? recordInfo = boundary.Element("record_info");
             RegistrationDate = recordInfo?.Element("registration_date")?.Value ?? string.Empty;
 
-            XElement? bObjectMunicipalBoundary = boundary.Element("b_object_zones_and_territories");
-            XElement? bObject = bObjectMunicipalBoundary?.Element("b_object");
+            XElement? bObjectZones = boundary.Element("b_object_zones_and_territories");
+            XElement? bObject = bObjectZones?.Element("b_object");
             Indexer = bObject?.Element("reg_numb_border")?.Value ?? string.Empty;
 
-            XElement? typeBoundary = bObject?.Element("type_zone");
-            TypeZoneCode = typeBoundary?.Element("code")?.Value ?? string.Empty;
-            TypeZoneValue = typeBoundary?.Element("value")?.Value ?? string.Empty;
+            XElement? typeBoundary = bObject?.Element("type_boundary");
+            TypeBoundaryCode = typeBoundary?.Element("code")?.Value ?? string.Empty;
+            TypeBoundaryValue = typeBoundary?.Element("value")?.Value ?? string.Empty;
+
+            XElement? typeZone = bObjectZones?.Element("type_zone");
+            TypeZoneCode = typeZone?.Element("code")?.Value ?? string.Empty;
+            TypeZoneValue = typeZone?.Element("value")?.Value ?? string.Empty;
 
             XElement? entitySpatial = boundary.Element("b_contours_location")?.Element("contours")?.Element("contour")?.Element("entity_spatial");
             SkId = entitySpatial?.Element("sk_id")?.Value ?? string.Empty;

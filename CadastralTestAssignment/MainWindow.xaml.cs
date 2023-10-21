@@ -1,24 +1,12 @@
-﻿using CadastralTestAssignment.MVVM.Model;
-using CadastralTestAssignment.MVVM.ViewModel;
+﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.IO;
-using System.Xml;
-using System.ComponentModel;
-using WinRT;
-using System.Reflection;
 
 namespace CadastralTestAssignment
 {
@@ -36,7 +24,6 @@ namespace CadastralTestAssignment
             PathToXml = System.IO.Path.GetFullPath(@"Files\24_21_1003001_2017-05-29_kpt11.xml");
             _viewModel = new DataViewModel(PathToXml);
             DataContext = _viewModel;
-
             _viewModel.PropertyChanged += OnPropertyChanged;
         }
 
@@ -48,14 +35,26 @@ namespace CadastralTestAssignment
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (_viewModel.SelectedItem != null)
-                _viewModel.SelectedItem.SoloSerialize();
+            if (_viewModel.SelectedItem is null)
+                return;
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "XML Files | *.xml";
+            saveFileDialog.DefaultExt = "xml";
+            saveFileDialog.FileName = $"{_viewModel.SelectedItem.Name}_{DateTime.Now.ToString("yy'-'MM'-'dd'_'HH'-'mm")}.xml";
+            bool? success = saveFileDialog.ShowDialog();
+
+            if (success == true)
+            {
+                _viewModel.SelectedItem.SoloSerialize(saveFileDialog.FileName);
+            }
+            
         }
 
         private void EnableButtons()
         {
             SaveSoloSelected.IsEnabled = true;
-            if (MainDataGrid.SelectedCells.Count > 0)
+            if (_viewModel.SelectedModels.Count > 0)
             {
                 SaveAllSelected.IsEnabled = true;
             }
@@ -68,6 +67,9 @@ namespace CadastralTestAssignment
         private void SetProperties()
         {
             PropertiesStackPanel.Children.Clear();
+            if (_viewModel.SelectedItem == null)
+                return;
+
             var properties = _viewModel.SelectedItem.GetType().GetProperties();
 
             foreach (var property in properties)
@@ -91,7 +93,7 @@ namespace CadastralTestAssignment
                         textBlock.Text = value;
                         textBlock.Background = Brushes.LightGray;
                         textBlock.Margin = new Thickness(20, 0, 20, 0);
-                        
+
 
                         PropertiesStackPanel.Children.Add(label);
                         PropertiesStackPanel.Children.Add(textBlock);
@@ -146,6 +148,62 @@ namespace CadastralTestAssignment
                     PropertiesStackPanel.Children.Add(spatialElementsListBox);
                 }
             }
+        }
+
+        private void SaveAllButtonClick(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "XML Files | *.xml";
+            saveFileDialog.DefaultExt = "xml";
+            saveFileDialog.FileName = $"extract_cadastral_plan_territory_{DateTime.Now.ToString("yy'-'MM'-'dd'_'HH'-'mm")}.xml";
+            bool? success = saveFileDialog.ShowDialog();
+
+            if (success == true)
+            {
+                LinqToXml.ExportToXml(_viewModel.MainDoc, _viewModel.SelectedModels, saveFileDialog.FileName);
+            }
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            var item = _viewModel.SelectedItem;
+            if (item != null && !_viewModel.SelectedModels.Contains(item))
+            {
+                _viewModel.SelectedModels.Add(item);
+                EnableButtons();
+            }
+        }
+
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            var item = _viewModel.SelectedItem;
+            if (item != null && _viewModel.SelectedModels.Contains(item))
+            {
+                _viewModel.SelectedModels.Remove(item);
+                EnableButtons();
+            }
+        }
+
+        private void OpenNewFile_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog fileDialog = new();
+            fileDialog.Filter = "XML Files | *.xml";
+            bool? success = fileDialog.ShowDialog();
+
+            if (success == true)
+            {
+                string path = fileDialog.FileName;
+                    PathToXml = path;
+                    OpenNewFile();
+            }
+        }
+
+        private void OpenNewFile()
+        {
+            _viewModel.PropertyChanged -= OnPropertyChanged;
+            _viewModel = new DataViewModel(PathToXml);
+            DataContext = _viewModel;
+            _viewModel.PropertyChanged += OnPropertyChanged;
         }
     }
 }

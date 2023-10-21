@@ -21,15 +21,13 @@ namespace CadastralTestAssignment.MVVM.Model
 
         public BoundaryModel(XElement boundary)
         {
+            Name = "Bound";
             Deserialize(boundary);
         }
         public override XElement Serialize()
         {
-            DateTime dateTime = DateTime.Now;
 
-            var boundaryData = new XElement("BoundaryData",
-                                        new XAttribute("CadastralNumber", Indexer ?? string.Empty),
-                                        new XAttribute("DateCreated", dateTime.ToString("yyyy'-'MM'-'dd")));
+            var boundaryData = new XElement("municipal_boundary_record");
 
             XElement recordInfo = new XElement("record_info",
                                       new XElement("registration_date", RegistrationDate));
@@ -68,7 +66,7 @@ namespace CadastralTestAssignment.MVVM.Model
             return boundaryData;
         }
 
-        public override void SoloSerialize()
+        public override void SoloSerialize(string path)
         {
             DateTime dateTime = DateTime.Now;
 
@@ -78,7 +76,7 @@ namespace CadastralTestAssignment.MVVM.Model
 
             xDoc.Add(boundaryData);
 
-            string savePath = Path.Combine("D:", $"BoundaryData_{dateTime.ToString("yy'-'MM'-'dd'_'HH'-'mm")}.xml");
+            string savePath = Path.Combine(path);
             xDoc.Save(savePath);
             MessageBox.Show($"File saved at: {savePath}");
 

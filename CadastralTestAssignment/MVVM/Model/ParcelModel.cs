@@ -39,6 +39,7 @@ namespace CadastralTestAssignment.MVVM.Model
 
         public ParcelModel(XElement parcel) 
         {
+            Name = "Parcel";
             Deserialize(parcel);
         }
 
@@ -106,12 +107,7 @@ namespace CadastralTestAssignment.MVVM.Model
         }
         public override XElement Serialize()
         {
-            DateTime dateTime = DateTime.Now;
-
-            var parsel = new XElement("Parcel",
-                    new XAttribute("CadastralNumber", Indexer ?? string.Empty),
-                    new XAttribute("State", TypeCode ?? string.Empty),
-                    new XAttribute("DateCreated", dateTime.ToString("yyyy'-'MM'-'dd")),
+            var parsel = new XElement("land_record",
                     new XElement("object",
                         new XElement("common_data",
                             new XElement("type",
@@ -186,7 +182,7 @@ namespace CadastralTestAssignment.MVVM.Model
             );
             return parsel;
         }
-        public override void SoloSerialize()
+        public override void SoloSerialize(string path)
         {
             DateTime dateTime = DateTime.Now;
 
@@ -268,7 +264,7 @@ namespace CadastralTestAssignment.MVVM.Model
                     )
                 )
             );
-            string savePath = Path.Combine("D:", $"Parcel_{dateTime.ToString("yy'-'MM'-'dd'_'HH'-'mm")}.xml");
+            string savePath = Path.Combine(path);
             xDoc.Save(savePath);
             MessageBox.Show($"File saved at: {savePath}");
         }

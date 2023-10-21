@@ -35,7 +35,7 @@ namespace CadastralTestAssignment.MVVM.Model
                 SetRandomIndexInsteadOfCadastralNumber();
         }
 
-        public override void SoloSerialize()
+        public override void SoloSerialize(string path)
         {
             Console.WriteLine("Nothing to serialize solo");
         }

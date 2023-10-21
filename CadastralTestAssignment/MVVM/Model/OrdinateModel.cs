@@ -45,11 +45,12 @@ namespace CadastralTestAssignment.MVVM.Model
             sb.Append(X);
             sb.Append(" Y:");
             sb.Append(Y);
+            sb.Append(" ");
             sb.AppendLine(GeopointValue ?? "");
             StringView = sb.ToString();
         }
 
-        public override void SoloSerialize()
+        public override void SoloSerialize(string path)
         {
             Console.WriteLine("Nothing to serialize solo");
         }

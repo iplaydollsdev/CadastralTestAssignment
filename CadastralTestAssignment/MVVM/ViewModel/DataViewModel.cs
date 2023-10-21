@@ -10,20 +10,20 @@ namespace CadastralTestAssignment.MVVM.ViewModel
 {
     internal class DataViewModel : ViewModelBase
     {
+        public DocModel MainDoc { get; private set; }
         public List<BaseModel> Models { get; private set; }
-
+        public List<BaseModel> SelectedModels { get; private set; } = new();
 
         public DataViewModel(string pathToXml)
         {
-            LinqToXml linqToXml = new LinqToXml();
-            linqToXml.GetModels(filePath: pathToXml);
-            Models = linqToXml.Models;
-            selectedItem = Models.First();
+            Models = LinqToXml.ImportFromXml(filePath: pathToXml);
+            MainDoc = Models.First() as DocModel ?? new DocModel();
+            Models.RemoveAt(0);
         }
 
-        private BaseModel selectedItem;
+        private BaseModel? selectedItem;
 
-        public BaseModel SelectedItem
+        public BaseModel? SelectedItem
         {
             get { return selectedItem; }
             set 

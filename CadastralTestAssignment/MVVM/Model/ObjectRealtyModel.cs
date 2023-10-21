@@ -37,17 +37,13 @@ namespace CadastralTestAssignment.MVVM.Model
 
         public ObjectRealtyModel(XElement objectRealty)
         {
+            Name = "ObjectRealty";
             Deserialize(objectRealty);
         }
 
         public override XElement Serialize()
         {
-            DateTime dateTime = DateTime.Now;
-
-            var objectRealy = new XElement("ObjectRealty",
-                    new XAttribute("CadastralNumber", Indexer ?? "01:01:0000001:1"),
-                    new XAttribute("State", TypeCode ?? string.Empty),
-                    new XAttribute("DateCreated", dateTime.ToString("yyyy'-'MM'-'dd")),
+            var objectRealy = new XElement("build_record",
                     new XElement("object",
                         new XElement("common_data",
                             new XElement("type",
@@ -111,7 +107,7 @@ namespace CadastralTestAssignment.MVVM.Model
             return objectRealy;
         }
 
-        public override void SoloSerialize()
+        public override void SoloSerialize(string path)
         {
             DateTime dateTime = DateTime.Now;
 
@@ -180,7 +176,7 @@ namespace CadastralTestAssignment.MVVM.Model
                         new XElement("value", Cost)
                     )
             )));
-            string savePath = Path.Combine("D:", $"ObjectRealty_{dateTime.ToString("yy'-'MM'-'dd'_'HH'-'mm")}.xml");
+            string savePath = Path.Combine(path);
             xDoc.Save(savePath);
             MessageBox.Show($"File saved at: {savePath}");
         }

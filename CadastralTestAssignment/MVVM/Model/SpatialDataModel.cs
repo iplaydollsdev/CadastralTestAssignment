@@ -18,18 +18,14 @@ namespace CadastralTestAssignment.MVVM.Model
 
         public SpatialDataModel(XElement spatialData) 
         {
+            Name = "SpatialData";
             Deserialize(spatialData);
         }
 
         public override XElement Serialize()
         {
-            DateTime dateTime = DateTime.Now;
 
-            var spatialData = new XElement("SpatialData");
-            XAttribute cadastralNumber = new XAttribute("CadastralNumber", Indexer ?? string.Empty);
-            XAttribute dataCreated = new XAttribute("DateCreated", dateTime.ToString("yyyy'-'MM'-'dd"));
-
-
+            var spatialData = new XElement("entity_spatial");
 
             XElement skId = new XElement("sk_id", SkId);
             XElement spatialsElements = new XElement("spatials_elements");
@@ -43,13 +39,10 @@ namespace CadastralTestAssignment.MVVM.Model
             spatialData.Add(skId);
             spatialData.Add(spatialsElements);
 
-            spatialData.Add(cadastralNumber);
-            spatialData.Add(dataCreated);
-
             return spatialData;
         }
 
-        public override void SoloSerialize()
+        public override void SoloSerialize(string path)
         {
             DateTime dateTime = DateTime.Now;
 
@@ -59,7 +52,7 @@ namespace CadastralTestAssignment.MVVM.Model
 
             xDoc.Add(spatialData);
 
-            string savePath = Path.Combine("D:", $"SpatialData_{dateTime.ToString("yy'-'MM'-'dd'_'HH'-'mm")}.xml");
+            string savePath = Path.Combine(path);
             xDoc.Save(savePath);
             MessageBox.Show($"File saved at: {savePath}");
 
