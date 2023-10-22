@@ -8,14 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Fonts\" />
-    <Folder Include="MVVM\View\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Files\24_21_1003001_2017-05-29_kpt11.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="MVVM\View\" />
   </ItemGroup>
 
 </Project>

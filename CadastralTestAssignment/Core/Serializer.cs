@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Xml.Serialization;
 
 namespace CadastralTestAssignment.Core
@@ -22,137 +25,83 @@ namespace CadastralTestAssignment.Core
             }
         }
 
-        public static void DisplayObjectProperties(object obj, StackPanel stackPanel)
+        public static void Serialize(CadastralPlanTerritory cadastralPlanTerritory, List<BaseRecordModel> selectedRecords, string pathToFile)
         {
-            if (obj == null)
+            XmlSerializer serializer = new(typeof(CadastralPlanTerritory));
+            using (FileStream fs = new(pathToFile, FileMode.OpenOrCreate))
             {
-                return;
-            }
-
-            Type objectType = obj.GetType();
-            PropertyInfo[] properties = objectType.GetProperties();
-
-            foreach (PropertyInfo property in properties)
-            {
-                object propertyValue = property.GetValue(obj);
-                string propertyName = property.Name;
-
-                if (propertyValue != null)
+                CadastralPlanTerritory cadastralPlanToSave = new CadastralPlanTerritory();
+                cadastralPlanToSave.CadastralBlocks = new List<CadastralBlock>();
+                cadastralPlanToSave.CadastralBlocks.Add(new CadastralBlock()
+                                                        {
+                                                            AreaQuarter = cadastralPlanTerritory.CadastralBlocks?.First().AreaQuarter,
+                                                            CadastralNumber = cadastralPlanTerritory.CadastralBlocks?.First().CadastralNumber,
+                                                            RecordData = new RecordData() { BaseData = new BaseData() }
+                                                        });
+                foreach (BaseRecordModel record in selectedRecords)
                 {
-                    if (property.PropertyType.IsPrimitive || property.PropertyType == typeof(string))
+                    if (record is LandRecord landRecord)
                     {
-                        // Это примитивное значение или строка, выводим
-                        string value = propertyValue.ToString();
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            stackPanel.Children.Add(new Label { Content = propertyName });
-                            stackPanel.Children.Add(new TextBlock { Text = value });
-                        }
+                        (cadastralPlanToSave.CadastralBlocks.First().RecordData!.BaseData!.LandRecords ??= new List<LandRecord>()).Add(landRecord);
                     }
-                    else if (propertyValue is System.Collections.IEnumerable enumerable)
+                    else if (record is BuildRecord buildRecord)
                     {
-                        // Если это коллекция, добавляем в ListBox
-                        ListBox listBox = new ListBox();
-                        foreach (var item in enumerable)
-                        {
-                            if (item is Ordinate ordinate)
-                            {
-                                // Если элемент - Ordinate, используем метод GetString()
-                                listBox.Items.Add(ordinate.GetString());
-                            }
-                            else if (item is SpatialElement spatialElement)
-                            {
-                                DisplayObjectProperties(spatialElement, stackPanel);
-                            }
-                            else if (item is Contour contour)
-                            {
-                                DisplayObjectProperties(contour, stackPanel);
-                            }
-                            else
-                            {
-                                listBox.Items.Add(item.ToString());
-                            }
-                        }
-                        //stackPanel.Children.Add(new Label { Content = propertyName });
-                        stackPanel.Children.Add(listBox);
+                        (cadastralPlanToSave.CadastralBlocks.First().RecordData!.BaseData!.BuildRecords ??= new List<BuildRecord>()).Add(buildRecord);
                     }
-                    else
+                    else if (record is ConstructionRecord constructionRecord)
                     {
-                        // Обходим вложенные объекты
-                        //stackPanel.Children.Add(new Label { Content = propertyName });
-                        DisplayObjectProperties(propertyValue, stackPanel);
+                        (cadastralPlanToSave.CadastralBlocks.First().RecordData!.BaseData!.ConstructionRecords ??= new List<ConstructionRecord>()).Add(constructionRecord);
+                    }
+                    else if (record is SpatialData spatialData)
+                    {
+                        cadastralPlanToSave.CadastralBlocks.First().SpatialData = spatialData;
+                    }
+                    else if (record is MunicipalBoundaryRecord municipalBoundaryRecord)
+                    {
+                        (cadastralPlanToSave.CadastralBlocks.First().MunicipalBoundaryRecords ??= new List<MunicipalBoundaryRecord>()).Add(municipalBoundaryRecord);
+                    }
+                    else if (record is ZonesAndTerritoriesRecord zonesAndTerritoriesRecord)
+                    {
+                        (cadastralPlanToSave.CadastralBlocks.First().ZonesAndTerritoriesRecords ??=new List<ZonesAndTerritoriesRecord>()).Add(zonesAndTerritoriesRecord);
                     }
                 }
+
+                serializer.Serialize(fs, cadastralPlanToSave);
             }
         }
-        //public static void DisplayObjectProperties(object obj, StackPanel stackPanel, int depth = 0)
-        //{
-        //    if (obj == null || depth >= 8)
-        //    {
-        //        return;
-        //    }
 
-        //    Type objectType = obj.GetType();
-        //    PropertyInfo[] properties = objectType.GetProperties();
-
-        //    foreach (PropertyInfo property in properties)
-        //    {
-        //        object propertyValue = property.GetValue(obj);
-        //        string propertyName = property.Name;
-
-        //        if (propertyValue != null)
-        //        {
-        //            if (property.PropertyType == typeof(DateTime))
-        //            {
-        //                // Если это свойство типа DateTime, выводим его как строку
-        //                string formattedDate = ((DateTime)propertyValue).ToString("yyyy-MM-dd HH:mm:ss");
-        //                stackPanel.Children.Add(new Label { Content = propertyName });
-        //                stackPanel.Children.Add(new TextBlock { Text = formattedDate });
-        //            }
-        //            else if (property.PropertyType.IsPrimitive || property.PropertyType == typeof(string))
-        //            {
-        //                // Это примитивное значение или строка, выводим
-        //                string value = propertyValue.ToString();
-        //                if (!string.IsNullOrEmpty(value))
-        //                {
-        //                    stackPanel.Children.Add(new Label { Content = propertyName });
-        //                    stackPanel.Children.Add(new TextBlock { Text = value });
-        //                }
-        //            }
-        //            else if (propertyValue is System.Collections.IEnumerable enumerable)
-        //            {
-        //                if (depth == 5 && property.Name == "Ordinates")
-        //                {
-        //                    // Максимальная глубина достигнута, вывести содержимое List<Ordinates>
-        //                    ListBox listBox = new ListBox();
-        //                    foreach (var item in enumerable)
-        //                    {
-        //                        if (item is Ordinate ordinate)
-        //                        {
-        //                            listBox.Items.Add(ordinate.GetString());
-        //                        }
-        //                    }
-        //                    stackPanel.Children.Add(new Label { Content = propertyName });
-        //                    stackPanel.Children.Add(listBox);
-        //                }
-        //                else
-        //                {
-        //                    // Продолжаем обход для других коллекций
-        //                    foreach (var item in enumerable)
-        //                    {
-        //                        DisplayObjectProperties(item, stackPanel, depth + 1);
-        //                    }
-        //                }
-        //            }
-        //            else
-        //            {
-        //                // Обходим вложенные объекты
-        //                stackPanel.Children.Add(new Label { Content = propertyName });
-        //                DisplayObjectProperties(propertyValue, stackPanel, depth + 1);
-        //            }
-        //        }
-        //    }
-        //}
+        public static void Serialize(BaseRecordModel selectedRecord, string pathToFile)
+        {
+            XmlSerializer serializer;
+            switch (selectedRecord.ModelName)
+            {
+                case "Parcel":
+                    serializer = new(typeof(LandRecord));
+                    break;
+                case "ObjectRealty":
+                    if (selectedRecord is BuildRecord)
+                        serializer = new(typeof(BuildRecord));
+                    else
+                        serializer = new(typeof(ConstructionRecord));
+                    break;
+                case "SpatialData":
+                    serializer = new(typeof(SpatialData));
+                    break;
+                case "Bound":
+                    serializer = new(typeof(MunicipalBoundaryRecord));
+                    break;
+                case "Zone":
+                    serializer = new(typeof(ZonesAndTerritoriesRecord));
+                    break;
+                default:
+                    return;
+            }
+            
+            using (FileStream fs = new(pathToFile, FileMode.OpenOrCreate))
+            {
+                serializer.Serialize(fs, selectedRecord);
+            }
+        }
     }
 
 }

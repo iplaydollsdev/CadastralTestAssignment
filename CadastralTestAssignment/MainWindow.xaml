@@ -37,7 +37,7 @@
                    FontSize="22"
                    Margin="20,0,0,0" Height="29" Width="90"/>
 
-        <TextBlock Text="{Binding MainPlan.CadastralBloks[0].CadastralBlock.CadastralNumber}"
+        <TextBlock Text="{Binding MainPlan.CadastralBlocks[0].CadastralNumber}"
                    VerticalAlignment="Center"
                    HorizontalAlignment="Left"
                    Foreground="White"
@@ -46,19 +46,19 @@
                    d:Text="00:000:0000:24" Height="29" Width="145"/>
         <StackPanel Grid.Row="0"
                     Grid.Column="1">
-            <TextBlock Text="{Binding MainDoc.OrganRegistrRights}"
+            <TextBlock Text="{Binding MainPlan.DetailsStatement.GroupTopRequisites.OrganRegistrRights}"
                    VerticalAlignment="Center"
                    HorizontalAlignment="Left"
                    Foreground="White"
                    FontSize="14"
                    Margin="20, 0, 0, 0"/>
-            <TextBlock Text="{Binding MainDoc.DateFormation}"
+            <TextBlock Text="{Binding MainPlan.DetailsStatement.GroupTopRequisites.DateFormation}"
                    VerticalAlignment="Center"
                    HorizontalAlignment="Left"
                    Foreground="White"
                    FontSize="14"
                    Margin="20, 0, 0, 0"/>
-            <TextBlock Text="{Binding MainDoc.RegistrationNumber}"
+            <TextBlock Text="{Binding MainPlan.DetailsStatement.GroupTopRequisites.RegistrationNumber}"
                    VerticalAlignment="Center"
                    HorizontalAlignment="Left"
                    Foreground="White"
@@ -109,7 +109,7 @@
                 Grid.Row="2"
                 Content="Save Selected"
                 HorizontalAlignment="Center" 
-                VerticalAlignment="Center" Click="Button_Click"
+                VerticalAlignment="Center" Click="SaveButtonClicked"
                 IsEnabled="False" Height="20" Width="100"/>
         <Button x:Name="SaveAllSelected" 
                 Grid.Row="2"

@@ -35,28 +35,10 @@ namespace CadastralTestAssignment
             SetPropertiesView();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            if (_viewModel.SelectedItem is null)
-                return;
-
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = "XML Files | *.xml";
-            saveFileDialog.DefaultExt = "xml";
-            saveFileDialog.FileName = $"{_viewModel.SelectedItem.ModelName}_{DateTime.Now.ToString("yy'-'MM'-'dd'_'HH'-'mm")}.xml";
-            bool? success = saveFileDialog.ShowDialog();
-
-            if (success == true)
-            {
-                //_viewModel.SelectedItem.SoloSerialize(saveFileDialog.FileName);
-            }
-
-        }
-
         private void EnableButtons()
         {
             SaveSoloSelected.IsEnabled = true;
-            if (_viewModel.SelectedModels.Count > 0)
+            if (_viewModel.SelectedModels.Count > 1)
             {
                 SaveAllSelected.IsEnabled = true;
             }
@@ -73,23 +55,86 @@ namespace CadastralTestAssignment
             if (item == null)
                 return;
 
-            Serializer.DisplayObjectProperties(item, PropertiesStackPanel);
-            //AddLabelAndTextblock("TypeCode", item.)
-            //foreach (var property in properties)
-            //{
+            DisplayRecordProperties(item, PropertiesStackPanel);
+        }
+        private void DisplayRecordProperties(object obj, StackPanel stackPanel)
+        {
+            if (obj == null)
+            {
+                return;
+            }
 
-            //}
+            Type objectType = obj.GetType();
+            PropertyInfo[] properties = objectType.GetProperties();
+
+            foreach (PropertyInfo property in properties)
+            {
+                object? propertyValue = property.GetValue(obj);
+                string propertyName = property.Name;
+
+                if (propertyValue != null)
+                {
+                    if (property.PropertyType.IsPrimitive || property.PropertyType == typeof(string))
+                    {
+                        if (property.Name == "Index" || property.Name == "ModelName" || property.Name == "IsSelected")
+                            continue;
+
+                        string? value = propertyValue.ToString();
+                        if (!string.IsNullOrEmpty(value))
+                        {
+                            stackPanel.Children.Add(new Label { Content = propertyName, HorizontalAlignment = HorizontalAlignment.Center });
+                            stackPanel.Children.Add(new TextBlock { Text = value, Background = Brushes.LightGray, Margin = new Thickness(20, 0, 20, 0) });
+                        }
+                    }
+                    else if (propertyValue is System.Collections.IEnumerable enumerable)
+                    {
+                        ListBox listBox = new ListBox();
+                        foreach (var item in enumerable)
+                        {
+                            if (item is Ordinate ordinate)
+                            {
+                                listBox.Items.Add(ordinate.GetString());
+                            }
+                            else if (item is SpatialElement spatialElement)
+                            {
+                                DisplayRecordProperties(spatialElement, stackPanel);
+                            }
+                            else if (item is Contour contour)
+                            {
+                                DisplayRecordProperties(contour, stackPanel);
+                            }
+                            else
+                            {
+                                listBox.Items.Add(item.ToString());
+                            }
+                        }
+                        listBox.IsEnabled = false;
+                        stackPanel.Children.Add(new Label { Content = propertyName, HorizontalAlignment = HorizontalAlignment.Center });
+                        stackPanel.Children.Add(listBox);
+                    }
+                    else
+                    {
+                        DisplayRecordProperties(propertyValue, stackPanel);
+                    }
+                }
+            }
         }
 
-
-        private void AddLabelAndTextblock(string label, string text)
+        private void SaveButtonClicked(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(text))
+            if (_viewModel.SelectedItem is null)
+                return;
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "XML Files | *.xml";
+            saveFileDialog.DefaultExt = "xml";
+            saveFileDialog.FileName = $"{_viewModel.SelectedItem.ModelName}_{DateTime.Now.ToString("yy'-'MM'-'dd'_'HH'-'mm")}.xml";
+            bool? success = saveFileDialog.ShowDialog();
+
+            if (success == true)
             {
-                Label labelElement = new Label { Content = label };
-                TextBlock textElement = new TextBlock { Text = text };
-                PropertiesStackPanel.Children.Add(labelElement);
-                PropertiesStackPanel.Children.Add(textElement);
+                Serializer.Serialize(_viewModel.SelectedItem, saveFileDialog.FileName);
+                MessageBox.Show($"Файл успешно сохранен!\n{saveFileDialog.FileName}");
             }
         }
 
@@ -103,8 +148,9 @@ namespace CadastralTestAssignment
 
             if (success == true)
             {
-                //SERIALIZE
-                //LinqToXml.ExportToXml(_viewModel.MainDoc, _viewModel.SelectedModels, saveFileDialog.FileName);
+                if (_viewModel.MainPlan != null)
+                Serializer.Serialize(_viewModel.MainPlan, _viewModel.SelectedModels, saveFileDialog.FileName);
+                MessageBox.Show($"Файл успешно сохранен!\n{saveFileDialog.FileName}");
             }
         }
 
@@ -138,16 +184,26 @@ namespace CadastralTestAssignment
             {
                 string path = fileDialog.FileName;
                     PathToXml = path;
-                    OpenNewFile();
+                    OpenFile();
             }
         }
 
-        private void OpenNewFile()
+        private void OpenFile()
         {
-            _viewModel.PropertyChanged -= OnPropertyChanged;
-            _viewModel = new DataViewModel(PathToXml);
-            DataContext = _viewModel;
-            _viewModel.PropertyChanged += OnPropertyChanged;
+            try
+            {
+                _viewModel.PropertyChanged -= OnPropertyChanged;
+                _viewModel = new DataViewModel(PathToXml);
+                DataContext = _viewModel;
+                _viewModel.PropertyChanged += OnPropertyChanged;
+            }
+            catch (Exception e)
+            {
+                _viewModel.PropertyChanged += OnPropertyChanged;
+                MessageBox.Show(e.Message);
+            }
+
         }
+
     }
 }
