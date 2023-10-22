@@ -83,12 +83,12 @@ namespace CadastralTestAssignment
                         if (!string.IsNullOrEmpty(value))
                         {
                             stackPanel.Children.Add(new Label { Content = propertyName, HorizontalAlignment = HorizontalAlignment.Center });
-                            stackPanel.Children.Add(new TextBlock { Text = value, Background = Brushes.LightGray, Margin = new Thickness(20, 0, 20, 0) });
+                            stackPanel.Children.Add(new TextBox { Text = value, Background = Brushes.LightGray, Margin = new Thickness(20, 0, 20, 0), IsReadOnly = true, IsReadOnlyCaretVisible = true });
                         }
                     }
                     else if (propertyValue is System.Collections.IEnumerable enumerable)
                     {
-                        ListBox listBox = new ListBox();
+                        ListBox listBox = new ListBox() { Margin = new Thickness(20, 0, 20, 0) };
                         foreach (var item in enumerable)
                         {
                             if (item is Ordinate ordinate)
