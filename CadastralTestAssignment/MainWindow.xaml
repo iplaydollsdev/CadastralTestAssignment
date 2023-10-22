@@ -11,9 +11,9 @@
         Background="#272537" WindowStartupLocation="CenterScreen"
         >
     <Window.Resources>
-        <CollectionViewSource x:Key="GroupedModels" Source="{Binding Models}">
+        <CollectionViewSource x:Key="GroupedModels" Source="{Binding AllRecords}">
             <CollectionViewSource.GroupDescriptions>
-                <PropertyGroupDescription PropertyName="Name"/>
+                <PropertyGroupDescription PropertyName="ModelName"/>
             </CollectionViewSource.GroupDescriptions>
         </CollectionViewSource>
     </Window.Resources>
@@ -37,7 +37,7 @@
                    FontSize="22"
                    Margin="20,0,0,0" Height="29" Width="90"/>
 
-        <TextBlock Text="{Binding MainDoc.Indexer}"
+        <TextBlock Text="{Binding MainPlan.CadastralBloks[0].CadastralBlock.CadastralNumber}"
                    VerticalAlignment="Center"
                    HorizontalAlignment="Left"
                    Foreground="White"
@@ -88,7 +88,7 @@
                 </GroupStyle>
             </DataGrid.GroupStyle>
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Cadastal Number" Binding="{Binding Indexer}" Width="7*" IsReadOnly="True" CanUserReorder="False"/>
+                <DataGridTextColumn Header="Cadastal Number" Binding="{Binding Index}" Width="7*" IsReadOnly="True" CanUserReorder="False"/>
                 <DataGridCheckBoxColumn Header="Select" Width="2*" Binding="{Binding IsSelected}" CanUserReorder="False">
                     <DataGridCheckBoxColumn.CellStyle>
                         <Style TargetType="DataGridCell">

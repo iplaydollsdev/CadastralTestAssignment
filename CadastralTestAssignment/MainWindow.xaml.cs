@@ -3,10 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using Windows.Media.Protection.PlayReady;
 
 namespace CadastralTestAssignment
 {
@@ -29,7 +32,7 @@ namespace CadastralTestAssignment
         private void OnPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             EnableButtons();
-            SetProperties();
+            SetPropertiesView();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
@@ -40,14 +43,14 @@ namespace CadastralTestAssignment
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "XML Files | *.xml";
             saveFileDialog.DefaultExt = "xml";
-            saveFileDialog.FileName = $"{_viewModel.SelectedItem.Name}_{DateTime.Now.ToString("yy'-'MM'-'dd'_'HH'-'mm")}.xml";
+            saveFileDialog.FileName = $"{_viewModel.SelectedItem.ModelName}_{DateTime.Now.ToString("yy'-'MM'-'dd'_'HH'-'mm")}.xml";
             bool? success = saveFileDialog.ShowDialog();
 
             if (success == true)
             {
-                _viewModel.SelectedItem.SoloSerialize(saveFileDialog.FileName);
+                //_viewModel.SelectedItem.SoloSerialize(saveFileDialog.FileName);
             }
-            
+
         }
 
         private void EnableButtons()
@@ -63,89 +66,30 @@ namespace CadastralTestAssignment
             }
         }
 
-        private void SetProperties()
+        private void SetPropertiesView()
         {
             PropertiesStackPanel.Children.Clear();
-            if (_viewModel.SelectedItem == null)
+            var item = _viewModel.SelectedItem;
+            if (item == null)
                 return;
 
-            var properties = _viewModel.SelectedItem.GetType().GetProperties();
+            Serializer.DisplayObjectProperties(item, PropertiesStackPanel);
+            //AddLabelAndTextblock("TypeCode", item.)
+            //foreach (var property in properties)
+            //{
 
-            foreach (var property in properties)
+            //}
+        }
+
+
+        private void AddLabelAndTextblock(string label, string text)
+        {
+            if (!string.IsNullOrWhiteSpace(text))
             {
-                if (property.PropertyType == typeof(string))
-                {
-                    if (property.Name == "Indexer" || property.Name == "Name" || property.Name == "IsSelected")
-                        continue;
-
-                    var value = property.GetValue(_viewModel.SelectedItem) as string;
-                    if (string.IsNullOrWhiteSpace(value) is false)
-                    {
-                        var label = new Label
-                        {
-                            Content = property.Name,
-                            HorizontalAlignment = HorizontalAlignment.Center
-                        };
-
-                        var textBlock = new TextBlock();
-                        textBlock.SetBinding(TextBlock.TextProperty, new Binding(property.Name));
-                        textBlock.Text = value;
-                        textBlock.Background = Brushes.LightGray;
-                        textBlock.Margin = new Thickness(20, 0, 20, 0);
-
-
-                        PropertiesStackPanel.Children.Add(label);
-                        PropertiesStackPanel.Children.Add(textBlock);
-                    }
-                }
-                if (property.PropertyType == typeof(List<SpatialElementModel>))
-                {
-                    var label = new Label
-                    {
-                        Content = "SpatialElements",
-                        HorizontalAlignment = HorizontalAlignment.Center
-                    };
-
-                    var spatialElements = property.GetValue(_viewModel.SelectedItem) as List<SpatialElementModel>;
-
-                    var spatialElementsListBox = new ListBox
-                    {
-                        IsEnabled = false
-                    };
-
-                    foreach (var spatialElement in spatialElements!)
-                    {
-                        var spatialElementLabel = new Label
-                        {
-                            Content = "Spatial Element",
-                            HorizontalAlignment = HorizontalAlignment.Center
-                        };
-
-                        var ordinatesListBox = new ListBox
-                        {
-                            IsEnabled = false
-                        };
-
-                        foreach (var ordinate in spatialElement.Ordinates)
-                        {
-                            var ordinateLabel = new Label
-                            {
-                                Content = ordinate.StringView,
-                            };
-
-                            ordinatesListBox.Items.Add(ordinateLabel);
-                        }
-
-                        var spatialElementStackPanel = new StackPanel();
-                        spatialElementStackPanel.Children.Add(spatialElementLabel);
-                        spatialElementStackPanel.Children.Add(ordinatesListBox);
-
-                        spatialElementsListBox.Items.Add(spatialElementStackPanel);
-                    }
-
-                    PropertiesStackPanel.Children.Add(label);
-                    PropertiesStackPanel.Children.Add(spatialElementsListBox);
-                }
+                Label labelElement = new Label { Content = label };
+                TextBlock textElement = new TextBlock { Text = text };
+                PropertiesStackPanel.Children.Add(labelElement);
+                PropertiesStackPanel.Children.Add(textElement);
             }
         }
 
@@ -159,7 +103,8 @@ namespace CadastralTestAssignment
 
             if (success == true)
             {
-                LinqToXml.ExportToXml(_viewModel.MainDoc, _viewModel.SelectedModels, saveFileDialog.FileName);
+                //SERIALIZE
+                //LinqToXml.ExportToXml(_viewModel.MainDoc, _viewModel.SelectedModels, saveFileDialog.FileName);
             }
         }
 
