@@ -15,14 +15,13 @@ namespace CadastralTestAssignment
     /// </summary>
     public partial class MainWindow : Window
     {
-        public string PathToXml { get; set; }
+        public string PathToXml { get; set; } = string.Empty;
         private DataViewModel _viewModel { get; set; }
 
         public MainWindow()
         {
             InitializeComponent();
-            PathToXml = System.IO.Path.GetFullPath(@"Files\24_21_1003001_2017-05-29_kpt11.xml");
-            _viewModel = new DataViewModel(PathToXml);
+            _viewModel = new DataViewModel();
             DataContext = _viewModel;
             _viewModel.PropertyChanged += OnPropertyChanged;
         }
@@ -76,7 +75,7 @@ namespace CadastralTestAssignment
             {
                 if (property.PropertyType == typeof(string))
                 {
-                    if (property.Name == "Indexer")
+                    if (property.Name == "Indexer" || property.Name == "Name" || property.Name == "IsSelected")
                         continue;
 
                     var value = property.GetValue(_viewModel.SelectedItem) as string;

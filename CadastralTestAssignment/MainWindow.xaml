@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:CadastralTestAssignment"
         mc:Ignorable="d"
         Height="600" Width="920"
-        WindowStyle="SingleBorderWindow"
+        WindowStyle="ToolWindow"
         ResizeMode="CanResize"
         Background="#272537" WindowStartupLocation="CenterScreen"
         >

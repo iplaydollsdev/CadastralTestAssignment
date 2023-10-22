@@ -157,7 +157,7 @@ namespace CadastralTestAssignment.Core
 
             xDoc.Add(extractCadastralPlanTerritory);
 
-            string savePath = Path.Combine(filePath/*, $"extract_cadastral_plan_territory_{dateTime.ToString("yy'-'MM'-'dd'_'HH'-'mm")}.xml")*/);
+            string savePath = Path.Combine(filePath);
             xDoc.Save(savePath);
             MessageBox.Show($"File saved at: {savePath}");
 
